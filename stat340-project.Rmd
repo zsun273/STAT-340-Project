@@ -1,0 +1,19 @@
+---
+title: "STAT340_project"
+author: "Zhuocheng Sun"
+date: "11/10/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+```{r load the data}
+data <- read.csv("Levels_Fyi_Salary_Data.csv")
+head(data)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

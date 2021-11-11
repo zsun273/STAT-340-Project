@@ -41,3 +41,6 @@ vignettes/*.pdf
 # Mac structural file
 .DS_Store
 
+# .idea file
+.idea/*
+

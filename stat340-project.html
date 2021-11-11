@@ -243,6 +243,48 @@ head(data)</code></pre>
 ## 5 &lt;NA&gt;      &lt;NA&gt;
 ## 6 &lt;NA&gt;      &lt;NA&gt;</code></pre>
 <p>Note that the <code>echo = FALSE</code> parameter was added to the code chunk to prevent printing of the R code that generated the plot.</p>
+<pre class="r"><code># filter gender, drop NA and other in gender
+filted_data &lt;- data %&gt;%
+  filter(gender %in% c(&quot;Female&quot;, &quot;Male&quot;))
+filted_data %&gt;%
+        group_by(gender) %&gt;%
+        summarise(n= n())</code></pre>
+<pre><code>## # A tibble: 2 × 2
+##   gender     n
+##   &lt;chr&gt;  &lt;int&gt;
+## 1 Female  6999
+## 2 Male   35702</code></pre>
+<pre class="r"><code># modify location column, drop location outside US and leave only state information
+filted_data = filted_data %&gt;%
+  select(company, level, title, totalyearlycompensation, location, yearsofexperience, yearsatcompany, basesalary,
+         stockgrantvalue, bonus, gender, Race, Education) %&gt;% 
+  group_by(location) %&gt;% 
+  mutate(new_location = strsplit(location, &#39;, &#39;)[[1]][2])
+
+
+
+states &lt;- c(&quot;AL&quot;, &quot;AK&quot;, &quot;AZ&quot;, &quot;AR&quot;, &quot;CA&quot;, &quot;CO&quot;, &quot;CT&quot;, &quot;DC&quot;, &quot;DE&quot;, &quot;FL&quot;, &quot;GA&quot;, 
+          &quot;HI&quot;, &quot;ID&quot;, &quot;IL&quot;, &quot;IN&quot;, &quot;IA&quot;, &quot;KS&quot;, &quot;KY&quot;, &quot;LA&quot;, &quot;ME&quot;, &quot;MD&quot;, 
+          &quot;MA&quot;, &quot;MI&quot;, &quot;MN&quot;, &quot;MS&quot;, &quot;MO&quot;, &quot;MT&quot;, &quot;NE&quot;, &quot;NV&quot;, &quot;NH&quot;, &quot;NJ&quot;, 
+          &quot;NM&quot;, &quot;NY&quot;, &quot;NC&quot;, &quot;ND&quot;, &quot;OH&quot;, &quot;OK&quot;, &quot;OR&quot;, &quot;PA&quot;, &quot;RI&quot;, &quot;SC&quot;, 
+          &quot;SD&quot;, &quot;TN&quot;, &quot;TX&quot;, &quot;UT&quot;, &quot;VT&quot;, &quot;VA&quot;, &quot;WA&quot;, &quot;WV&quot;, &quot;WI&quot;, &quot;WY&quot;)
+
+filted_data &lt;- filted_data %&gt;% 
+  filter(new_location %in% states)
+
+head(filted_data)</code></pre>
+<pre><code>## # A tibble: 6 × 14
+## # Groups:   location [5]
+##   company  level title totalyearlycomp… location yearsofexperien… yearsatcompany
+##   &lt;chr&gt;    &lt;chr&gt; &lt;chr&gt;            &lt;int&gt; &lt;chr&gt;               &lt;dbl&gt;          &lt;dbl&gt;
+## 1 GE Digi… Seni… Soft…           140000 San Ram…                4              4
+## 2 Amazon   L5    Soft…           172000 Seattle…               12              2
+## 3 Uber     L5    Soft…           325000 San Fra…                7              2
+## 4 Microso… 60    Soft…           150000 Seattle…                4              0
+## 5 Google   L6    Soft…           640000 Mountai…               11              4
+## 6 Toyota … L3    Soft…           189000 Boston,…                0              0
+## # … with 7 more variables: basesalary &lt;dbl&gt;, stockgrantvalue &lt;dbl&gt;,
+## #   bonus &lt;dbl&gt;, gender &lt;chr&gt;, Race &lt;chr&gt;, Education &lt;chr&gt;, new_location &lt;chr&gt;</code></pre>
 </div>
 
 

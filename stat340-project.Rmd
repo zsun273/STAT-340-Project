@@ -7,6 +7,8 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(tidyverse)
 ```
 
 ## R Markdown
@@ -18,4 +20,36 @@ head(data)
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
 
+```{r}
+# filter gender, drop NA and other in gender
+filted_data <- data %>%
+  filter(gender %in% c("Female", "Male"))
+filted_data %>%
+        group_by(gender) %>%
+        summarise(n= n())
 
+
+```
+```{r}
+# modify location column, drop location outside US and leave only state information
+filted_data = filted_data %>%
+  select(company, level, title, totalyearlycompensation, location, yearsofexperience, yearsatcompany, basesalary,
+         stockgrantvalue, bonus, gender, Race, Education) %>% 
+  group_by(location) %>% 
+  mutate(new_location = strsplit(location, ', ')[[1]][2])
+
+
+
+states <- c("AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DC", "DE", "FL", "GA", 
+          "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", 
+          "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", 
+          "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", 
+          "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY")
+
+filted_data <- filted_data %>% 
+  filter(new_location %in% states)
+
+head(filted_data)
+
+  
+```

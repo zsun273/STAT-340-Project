@@ -9,6 +9,11 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 library(dplyr)
 library(tidyverse)
+library(lubridate)
+library(ggplot2)
+library(maps)
+library(mapdata)
+library(usdata)
 ```
 
 ## R Markdown
@@ -53,3 +58,60 @@ head(filted_data)
 
   
 ```
+```{r}
+filted_data1 <- filted_data %>% 
+  filter(!is.na(Race))
+ggplot(filted_data1, aes(x = Race, y = basesalary, fill = gender)) +
+  geom_boxplot()+ggtitle("Relationship between gender, race and basesalary")+ylab("Basesalary")
+```
+
+```{r}
+ggplot(filted_data) +
+  geom_boxplot(aes(x=as.character(new_location),y=basesalary, fill=new_location),
+                outlier.shape = NA,alpha= 0.3) +
+  theme(legend.position="none") +
+  ylim(0, 260000) +
+  ylab("base salary") +
+  xlab("States") +
+  scale_x_discrete(guide = guide_axis(angle = 60)) +
+  ggtitle("Base Salary in Different State")
+```
+
+```{r}
+state_mean=filted_data %>%
+  group_by(new_location) %>%
+  summarise(n= n(),
+            mean_salary_state=mean(basesalary))
+ 
+ggplot(state_mean, aes(x=reorder(new_location, mean_salary_state),y=mean_salary_state)) +
+  geom_point() + 
+  geom_line() +
+  scale_x_discrete(guide = guide_axis(angle = 60)) +
+  ylab("Average Base Salary") +
+  xlab("States") +
+  ggtitle("Average Base Salary of each States")
+```
+
+```{r}
+
+library(lubridate)
+states <- map_data("state") %>% 
+  select(-subregion) %>% 
+  mutate(new_location = state2abbr(region))
+
+states = full_join(states, state_mean, by = "new_location") 
+
+ggplot(states, aes(x = long, y = lat, group = group, fill = mean_salary_state)) +
+  geom_polygon(color = "white") +
+  coord_fixed(1.5) +
+  theme_bw()+ ggtitle("Average Base Salary for different US States") + 
+  xlab("Longitude")+ 
+  ylab("Latitude")+
+  labs(caption = "Tips: No data for SD(South Dakota)")+
+  scale_fill_continuous(name="Average Base Salary", 
+            low = "lightblue", high = "darkblue",limits = c(60000,180000), 
+            breaks=c(60000,80000,100000,120000,140000,160000), na.value = "grey50")
+
+```
+```
+

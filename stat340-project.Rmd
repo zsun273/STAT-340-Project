@@ -111,5 +111,59 @@ ggplot(states, aes(x = long, y = lat, group = group, fill = mean_salary_state)) 
             breaks=c(60000,80000,100000,120000,140000,160000), na.value = "grey50")
 
 ```
+```{r}
+filted_data %>% 
+  ggplot(aes(x = gender, y = log(basesalary), fill = gender)) +
+  geom_boxplot()+ggtitle("Relationship between gender and basesalary")+ylab("Basesalary")
+```
+```{r}
+ggplot(filted_data) + 
+  geom_density(aes(x = log(basesalary), color = gender), alpha = 0.2) +
+  xlab('Base Salary') +
+  ylab('Density') +
+  ggtitle('Density of Base Salary')
+```
+```{r}
+# using wilcoxon test to test whether the median income of the male and female
+res <- wilcox.test(basesalary ~ gender, filted_data,var.equal = TRUE)
+res
+```
+```{r}
+# We'll adapt the permutation testing approach we saw in lecture.
+# Each MC replicate, we will randomly assign the data to two groups and compare their me ans.
+# Then we'll see how the true difference in means compares to these.
+male_data <- filted_data %>% 
+  filter(gender == "Male")
+female_data <- filted_data %>% 
+  filter(gender == "Female")
+Nrep <- 1000; 
+reps <- rep( NA, Nrep)
+n <- nrow(filted_data);
 
+n_male <- nrow(male_data)
+n_female <- nrow(female_data)
 
+for( i in 1:Nrep ) {
+  inds <- sample(1:n, n_male, replace=FALSE );
+  reps[i] <- median(filted_data[inds,]$basesalary) - mean(filted_data[-inds,]$basesalary)
+  }
+# Form the CI
+CI <- as.vector( quantile(reps, probs = c(0.025,0.975)) );
+# Note that we could get these means with a more graceful GroupBy operation,
+# But I want to make it very clear what we are computing here. 
+Female_inds <- (filted_data$gender== "Female");
+Female_salary <- filted_data[Female_inds,]$basesalary;
+Female_median <- median(Female_salary);
+Male_inds <- (filted_data$gender== "Male");
+Male_salary <- filted_data[Male_inds,]$basesalary;
+Male_median <- median(Male_salary);
+popdiff <- Female_median-Male_median;
+
+(CI[1] < popdiff) & (popdiff < CI[2]);
+```
+```{r}
+mlm <- lm(basesalary ~ 1+yearsofexperience+yearsatcompany+title+new_location,male_data)
+summary(mlm)
+flm <- lm(basesalary ~ 1+yearsofexperience+yearsatcompany+title+new_location,female_data)
+summary(flm)
+```

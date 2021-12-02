@@ -1,7 +1,6 @@
 ---
 title: "STAT340_project"
-author: "Zhuocheng Sun"
-date: "11/10/2021"
+date: "12/02/2021"
 output: html_document
 ---
 
@@ -23,7 +22,6 @@ data <- read.csv("Levels_Fyi_Salary_Data.csv")
 head(data)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
 
 ```{r}
 # filter gender, drop NA and other in gender
@@ -56,8 +54,8 @@ filted_data <- filted_data %>%
 
 head(filted_data)
 
-  
 ```
+
 ```{r}
 filted_data1 <- filted_data %>% 
   filter(!is.na(Race))
@@ -113,5 +111,5 @@ ggplot(states, aes(x = long, y = lat, group = group, fill = mean_salary_state)) 
             breaks=c(60000,80000,100000,120000,140000,160000), na.value = "grey50")
 
 ```
-```
+
 

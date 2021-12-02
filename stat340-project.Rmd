@@ -167,3 +167,17 @@ summary(mlm)
 flm <- lm(basesalary ~ 1+yearsofexperience+yearsatcompany+title+new_location,female_data)
 summary(flm)
 ```
+```{r}
+filted_data$company = toupper(filted_data$company)
+companies <- filted_data %>% group_by(company)%>%
+  summarise(n= n())
+
+com_rela <- filted_data %>%
+  group_by(company,gender)%>%
+  summarise(basesalary=median(basesalary)) %>%
+  pivot_wider(names_from = gender, values_from = basesalary) %>%
+  drop_na() %>%
+  mutate(sal_diff= Male -Female)
+hist(log(com_rela$sal_diff))
+mean(com_rela$sal_diff)
+```

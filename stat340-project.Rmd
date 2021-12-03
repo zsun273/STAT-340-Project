@@ -167,6 +167,7 @@ summary(mlm)
 flm <- lm(basesalary ~ 1+yearsofexperience+yearsatcompany+title+new_location,female_data)
 summary(flm)
 ```
+
 ```{r}
 filted_data$company = toupper(filted_data$company)
 companies <- filted_data %>% group_by(company)%>%
@@ -181,3 +182,45 @@ com_rela <- filted_data %>%
 hist(log(com_rela$sal_diff))
 mean(com_rela$sal_diff)
 ```
+
+Is there any difference in gender gaps for different job positions?
+```{r gender gap in different job titles, message=FALSE}
+title_diff <- filted_data %>% 
+  group_by(title, gender) %>% 
+  summarise(basesalary=median(basesalary))
+
+basesalary <- title_diff$basesalary
+tmp <- basesalary[2:30]
+tmp[30] <- 0
+title_diff$basesalary <- title_diff$basesalary - tmp
+gap <- title_diff %>% 
+  filter(gender == "Female") %>% 
+  select(-2) %>% 
+  mutate(basesalary = basesalary * (-1))
+
+ggplot(gap, aes(x=title, y=basesalary, color="cyan")) +
+  geom_col() +
+  scale_x_discrete(guide = guide_axis(angle = 30)) +
+  ylab("Median Base Salary Difference") +
+  xlab("Job Titles") +
+  ggtitle("Median Base Salary Difference in Different Job Titles (M-F)")
+```
+
+***
+
+We previously found that there is a gender gap of base salary in STEM fields. And if we breakdown STEM fields into these 15 job titles, we can see that male workers still have a higher median base salary in most jobs. The gender gap for Management Consultant is the most extreme. 
+
+***
+
+```{r, inlcude=FALSE, warning=FALSE, message=FALSE}
+filted_data %>%
+  group_by(title, gender) %>% 
+  summarise(n=n()) %>% 
+  filter(title == "Mechanical Engineer")
+```
+
+***
+
+As we saw above, Mechanical Engineer is the only job which women has a higher median base salary than men does. However, we only have 39 data entries for female Mechanical Engineer. Therefore, the median base salary for female Mechanical Engineer can change dramatically if we have more data of that. 
+
+***

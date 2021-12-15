@@ -198,29 +198,73 @@ gap <- title_diff %>%
   select(-2) %>% 
   mutate(basesalary = basesalary * (-1))
 
-ggplot(gap, aes(x=title, y=basesalary, color="cyan")) +
+ggplot(gap, aes(x=title, y=basesalary)) +
   geom_col() +
   scale_x_discrete(guide = guide_axis(angle = 30)) +
   ylab("Median Base Salary Difference") +
   xlab("Job Titles") +
   ggtitle("Median Base Salary Difference in Different Job Titles (M-F)")
+
+ggplot(gap, aes(x=basesalary)) +
+  geom_histogram(color="white", fill="steelblue", bins=6) +
+  xlab("Median Base Salary Difference (Male - Female)") +
+  ylab("Count") +
+  ggtitle("Median Base Salary Difference in Different Job Titles")
 ```
 
 ***
 
-We previously found that there is a gender gap of base salary in STEM fields. And if we breakdown STEM fields into these 15 job titles, we can see that male workers still have a higher median base salary in most jobs. The gender gap for Management Consultant is the most extreme. 
+From this histogram, we can see that for most job titles, male workers have a higher median base salary than female workers. For some job titles like Data Scientist, Recruiter, the difference is very small. For Management Consultant, Human resources, and Sales, the difference is relatively large. Therefore, it seems that, within each job title, there exists base salary differences of males and females.
 
 ***
 
-```{r, inlcude=FALSE, warning=FALSE, message=FALSE}
-filted_data %>%
-  group_by(title, gender) %>% 
-  summarise(n=n()) %>% 
-  filter(title == "Mechanical Engineer")
+***
+To verity that base salary differences of males and females in each job title is not the same, we conduct a chi-squared test to verity it. If there is no obvious gender base salary gap in each job level, the standard deviation of the base salary difference should be very small. And we consider the a standard deviation less than 500 to be small. 
+
+Our null hypothesis is 
+$H_0: $ No obvious gender base salary gap difference between each job title 
+and $H_1:$ There exists gender base salary gap difference between each job title 
+***
+
+```{r echo=FALSE, message = FALSE}
+library(EnvStats)
+varTest(x = gap$basesalary, sigma.squared =  1/10000)
 ```
 
 ***
+According to the chi-squared test, because the p-value is smaller than `2.2e-16`, which means the we can reject the null hypothesis that there is no obvious gender base salary gap difference between each job title.
 
-As we saw above, Mechanical Engineer is the only job which women has a higher median base salary than men does. However, we only have 39 data entries for female Mechanical Engineer. Therefore, the median base salary for female Mechanical Engineer can change dramatically if we have more data of that. 
+Then we want to figure out how big the gender gap in base salary for different job titles. So for each job title, we conduct a two sample wilcoxon test to test whether the median base salary of male and female with that job title is equal. Then we show the test result as follows:
+***
+
+```{r}
+job_title <- gap$title
+results <- data.frame('Row'=rep(1:length(job_title)),
+                      'Job_Title' = rep(NA, length(job_title)),
+                      'P_Value' = rep(NA, length(job_title)))
+
+for (i in 1:length(job_title)) {
+  tmp <- filted_data %>% 
+    filter(title == job_title[i])
+  res <- wilcox.test(basesalary ~ gender, tmp,var.equal = TRUE)
+  results[i,]$P_Value = res$p.value
+  results[i,]$Job_Title = job_title[i]
+}
+results <- results %>% 
+  mutate(significant = (P_Value <= 0.01))
+
+results
+```
+***
+According to the results of our wilcoxon test, we find that we can reject the null hypothesis (Male workers have the same median base salary as female workers with the same job title) for 5 job titles. For the rest 10 job titles, we cannot reject the null hypothesis. 
+***
+
+```{r echo=FALSE}
+results %>% 
+  filter(significant == TRUE)
+```
+
+***
+In conclusion, gender gap presents differently in different job titles and in some jobs, there might not be a gender gap. From the above histogram and wilcoxon test, we find that there is strong evidence that gender gap exists in employees with job title "Product Designer", "Product Manager", "Software Engineer", "Solution Architect", and "Technical Program Manager".  
 
 ***

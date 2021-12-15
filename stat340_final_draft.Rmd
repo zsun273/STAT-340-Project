@@ -2,8 +2,8 @@
 title: 'STAT340 Final Report: Gender Base Salary Gap in STEM Field'
 date: "12/02/2021"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 
 ## Group Member:
@@ -215,7 +215,10 @@ filted_data %>%
 
 According to the above plot, It seems that the median income of females is only slightly lower than males income. Therefore, we cannot tell whether males and females truly have different median income in stem fields, so we conduct hypothesis tests to verify what is shown in the plot.
 
-Our null hypothesis is $H_0 : Median\_Salary_{male} = Median\_Salary_{female}$, and the alternative hypothesis is
+Our null hypothesis is 
+$H_0 : Median\_Salary_{male} = Median\_Salary_{female}$
+
+The alternative hypothesis is
 $H_1: Median\_Salary_{male} \neq Median\_Salary_{female}$
 
 First, we conduct a two sample wilcoxon test, a test focus on testing the median of datasets, and the test result shows as follows:
@@ -329,6 +332,7 @@ results <- data.frame('Row'=rep(1:length(states)),
                       'State' = rep(NA, length(states)),
                       'P_Value' = rep(NA, length(states)))
 
+
 for (i in 1:length(states)) {
   tmp <- filted_data %>% 
     filter(new_location == states[i])
@@ -360,21 +364,88 @@ results %>%
 Therefore, at least based on our data and test results, there is obvious evidence that CA, WA, MA, NY, OR, TX, MN, NC, and FL states has gender base salary gaps, which means the the base salary difference in gender are vary related to location.
 
 
+Is there any difference in gender gaps for different job positions?
+```{r gender gap in different job titles, message=FALSE}
+title_diff <- filted_data %>% 
+  group_by(title, gender) %>% 
+  summarise(basesalary=median(basesalary))
 
+basesalary <- title_diff$basesalary
+tmp <- basesalary[2:30]
+tmp[30] <- 0
+title_diff$basesalary <- title_diff$basesalary - tmp
+gap <- title_diff %>% 
+  filter(gender == "Female") %>% 
+  select(-2) %>% 
+  mutate(basesalary = basesalary * (-1))
 
-```{r}
-filted_data$company = toupper(filted_data$company)
-companies <- filted_data %>% group_by(company)%>%
-  summarise(n= n())
+ggplot(gap, aes(x=title, y=basesalary)) +
+  geom_col() +
+  scale_x_discrete(guide = guide_axis(angle = 30)) +
+  ylab("Median Base Salary Difference") +
+  xlab("Job Titles") +
+  ggtitle("Median Base Salary Difference in Different Job Titles (M-F)")
 
-com_rela <- filted_data %>%
-  group_by(company,gender)%>%
-  summarise(basesalary=median(basesalary)) %>%
-  pivot_wider(names_from = gender, values_from = basesalary) %>%
-  drop_na() %>%
-  mutate(sal_diff= Male -Female)
-hist(log(com_rela$sal_diff))
-mean(com_rela$sal_diff)
+ggplot(gap, aes(x=basesalary)) +
+  geom_histogram(color="white", fill="steelblue", bins=6) +
+  xlab("Median Base Salary Difference (Male - Female)") +
+  ylab("Count") +
+  ggtitle("Median Base Salary Difference in Different Job Titles")
 ```
 
+***
 
+From this histogram, we can see that for most job titles, male workers have a higher median base salary than female workers. For some job titles like Data Scientist, Recruiter, the difference is very small. For Management Consultant, Human resources, and Sales, the difference is relatively large. Therefore, it seems that, within each job title, there exists base salary differences of males and females.
+
+***
+
+***
+To verity that base salary differences of males and females in each job title is not the same, we conduct a chi-squared test to verity it. If there is no obvious gender base salary gap in each job level, the standard deviation of the base salary difference should be very small. And we consider the a standard deviation less than 500 to be small. 
+
+Our null hypothesis is 
+$H_0: $ No obvious gender base salary gap difference between each job title 
+and $H_1:$ There exists gender base salary gap difference between each job title 
+***
+
+```{r echo=FALSE, message = FALSE}
+library(EnvStats)
+varTest(x = gap$basesalary, sigma.squared =  1/10000)
+```
+
+***
+According to the chi-squared test, because the p-value is smaller than `2.2e-16`, which means the we can reject the null hypothesis that there is no obvious gender base salary gap difference between each job title.
+
+Then we want to figure out how big the gender gap in base salary for different job titles. So for each job title, we conduct a two sample wilcoxon test to test whether the median base salary of male and female with that job title is equal. Then we show the test result as follows:
+***
+
+```{r}
+job_title <- gap$title
+results <- data.frame('Row'=rep(1:length(job_title)),
+                      'Job_Title' = rep(NA, length(job_title)),
+                      'P_Value' = rep(NA, length(job_title)))
+
+for (i in 1:length(job_title)) {
+  tmp <- filted_data %>% 
+    filter(title == job_title[i])
+  res <- wilcox.test(basesalary ~ gender, tmp,var.equal = TRUE)
+  results[i,]$P_Value = res$p.value
+  results[i,]$Job_Title = job_title[i]
+}
+results <- results %>% 
+  mutate(significant = (P_Value <= 0.01))
+
+results
+```
+
+***
+According to the results of our wilcoxon test, we find that we can reject the null hypothesis (Male workers have the same median base salary as female workers with the same job title) for 5 job titles. For the rest 10 job titles, we cannot reject the null hypothesis. 
+***
+
+```{r echo=FALSE}
+results %>% 
+  filter(significant == TRUE)
+```
+
+***
+In conclusion, gender gap presents differently in different job titles and in some jobs, there might not be a gender gap. From the above histogram and wilcoxon test, we find that there is strong evidence that gender gap exists in employees with job title "Product Designer", "Product Manager", "Software Engineer", "Solution Architect", and "Technical Program Manager".  
+***

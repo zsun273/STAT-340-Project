@@ -44,3 +44,9 @@ vignettes/*.pdf
 # .idea file
 .idea/*
 
+*.log
+
+*.tex
+
+
+

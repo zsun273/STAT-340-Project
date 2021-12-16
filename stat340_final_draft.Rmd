@@ -362,7 +362,7 @@ Therefore, at least based on our data and test results, there is obvious evidenc
 
 
 
-```{r}
+```{r include=FALSE}
 filted_data$company = toupper(filted_data$company)
 companies <- filted_data %>% group_by(company)%>%
   summarise(n= n())

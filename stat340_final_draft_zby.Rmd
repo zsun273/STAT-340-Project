@@ -33,6 +33,9 @@ library(leaps)
 ## Abstract
 Today, women earn approximately 82 cents for every dollar earned by a man(Carlton, G., 2021, The biggest barriers for women in STEM). However, a report from Scientific American shows that in the STEM field, males and females have approximately equal average base salaries (Ceci et al., 2015, Scientific American). Unlike other working fields, it seems that the gender salary gap in STEM fields is the least obvious. However, during our research and feedback from our friends, it seems that there still exists some salary gap in gender. Also, we found that in the STEM field, other factors such as regions, employee' education backgrounds, etc. also seem correlated with base salaries. Therefore, we want to figure out whether there truly exists gender differences in the STEM field, and if there exists, does such difference correlate with other factors like regions, job positions, different kinds of companies, etc? Based on these questions, our data is mainly focusing on the different personal situations and different salaries of employee in the STEM fields. Based on our research, we find that there still exists gender base salary gap in STEM field, and such gender base salary gap also depends on factors like regions (in state level), Job titles (positions) and Companies.
 
+
+
+
 ## Dataset descriptions
 
 We totally use two data sets for our program
@@ -87,6 +90,7 @@ The URL for this data set: https://worldpopulationreview.com/state-rankings/cost
 
 This data set is from and gathered by World Population Review website that allows you to compare the cost of living index for different states. We used this dataset because for some states like CA, WA, NY and MA are very expensive states and many tech companies are based there, so base salaries will be higher there, and that may nagetively impact our regression model if we use state as one possible predictor. Therefore, to best predict base salary of different states and minimize such effects, we plan to add the cost of living index by state variable as an addition predictor.
 
+
 #### Description of this dataset:
 
 This data set contains the cost-of-living-index for each state in America, also contains the cost index in sub living categories like Grocery, Housing, Utilities, etc.
@@ -102,12 +106,17 @@ Variables:
 - Misc: The cost of index in misc category for each state in America
 
 
+
+
 ## Statistical Questions:
 
-Main question: Is there a gender gap in income level(base salary) in different data science and STEM subfields and different regions? Does the difference vary depending on other factors (e.g., education, subfields, companies, regions, etc.)?
+Main question: Is there a gender gap in income level(base salary) in the STEM fields? Does the difference vary depending on other factors (e.g., education, subfields, companies, regions, etc.)?
 
 
-# Process and summaries:
+
+
+
+## Process and part summaries:
 Because in our data set may contain outliners (i.e Some CEOs and employees may have extremely high base salaries), so instead of using average base salary, our research focus on the median base salaries.
 
 At first, we want to consider whether there truly exists gender gap in base salary, so we drow a box plot to show the median 'basesalary' (in logarithm) of males and females. We use logarithm to better visualize the difference
@@ -305,11 +314,17 @@ mlm <- lm(basesalary ~ 1+gender+yearsofexperience+yearsatcompany+title+costIndex
 summary(mlm)
 ```
 
-According to the regression model,males have a high potential ability to earn more base salary, and some job titles, years of experiences also affect the base salary of employees. Also, it seems like state location indeed effects the employees' salary (some state location is significant to the  base salary, and cost of living also make the contribution of the base salary), so do location effects the gender base salary gap?
+According to the regression model, males have a high potential ability to earn more base salary, and some job titles, years of experiences also affect the base salary of employees. Also, it seems like state location indeed effects the employees' salary (some state location is significant to the  base salary, and cost of living also make the contribution of the base salary), so do location effects the gender base salary gap?
 
 Based on the regression model, we want to figure out whether the gender base salary gap vary in factors like job titles, locations (in state level) and companies.
 
-First we focused on the location factors, we want to figure out whether regions (at state level) influence the base salary difference of males and females. We compute the base salary difference for each state and make the following frequency plot.
+
+
+
+
+#### First we focused on the location factors, we want to figure out whether regions (at state level) influence the base salary difference of males and females. 
+
+We compute the base salary difference for each state and make the following frequency plot.
 
 ```{r echo=FALSE, message = FALSE}
 state_rela <- filted_data %>% 
@@ -325,12 +340,16 @@ ggplot(state_rela, aes(x = sal_diff))+
   ggtitle("Base Salary Difference across all States")+
   theme_bw()
 ```
+
 The overall histogram shows that the values range from around -20000 to near 40000 with a normal distribution, which means for many states, median base salary for males is 10 thousand dollars greater than females, but there are also plenty of states that have more serious base salary differences and some states have smaller base salary differences. Therefore, it seem that at the state level, there exists base salary differences of males and females.
 
 To verify there exists base salary differences of males and females in state level, we conduct a chi-squared test to verify it. If there is no obvious gender base salary gap in state level, the stand deviation of the base salary difference should be very small (close to 0)
 
-Our null hypothesis is $H_0: $ no obvious gender base salary gap in state level
-and $H_1:$ There exists gender base salary gap in state level
+Our null hypothesis is 
+$H_0:$ No obvious gender base salary gap in state level
+
+and alternative hypothesis is
+$H_1:$ There exists gender base salary gap in state level
 
 ```{r echo=FALSE, message = FALSE}
 library(EnvStats)
@@ -339,7 +358,7 @@ varTest(x = state_rela$sal_diff, sigma.squared =  1/10000)
 
 According to the chi-squared test, because the p-value is smaller than `2.2e-16`, which means the we can reject other null hypothesis that there is no obvious gender base salary gap in state level.
 
-Then we want to figure out which states have gender base salary gap, and which states do not have. So for each state, we conduct a two sample wilcoxon test to test whether the median base salary of male and female in that state is equal. Then we show the test result as follows:
+Then we want to figure out which states have gender base salary gap, and which states do not have. So for each state, we conduct a two sample wilcoxon test to test whether the median base salary of male and female in that state is equal.
 
 ```{r warning=FALSE, echo=FALSE, message = FALSE}
 states <- filted_data %>% 
@@ -365,15 +384,15 @@ for (i in 1:length(states)) {
 results <- results %>% 
   mutate(significant = (P_Value <= 0.05))
 
-results
+#results
 
-results %>% 
-  group_by(significant) %>% 
-  summarise(n = n()) %>% 
-  drop_na()
+#results %>% 
+ # group_by(significant) %>% 
+  #summarise(n = n()) %>% 
+  #drop_na()
 ```
 
-According to the results of our wilcoxon test, we can find that based on our data, there are 9 states reject our null hypothesis that there are no base salary difference. And data from 34 states cannot reject the null hypothesis. Ststes that reject the null hypothesis are as follows:
+According to the results of our wilcoxon test, we find that based on our data, there are 9 states reject our null hypothesis that there are no base salary difference. And data from 34 states cannot reject the null hypothesis. States that reject the null hypothesis are as follows:
 
 ```{r echo=FALSE}
 results %>% 
@@ -382,56 +401,12 @@ results %>%
 
 Therefore, at least based on our data and test results, there is obvious evidence that CA, WA, MA, NY, OR, TX, MN, NC, and FL states has gender base salary gaps, which means the the base salary difference in gender are vary related to location.
 
-Now we focused on the companies factors, we want to find out which companies have the most influence on the base salary difference of males and females. The plot follows the same logic as above-we count the number of companies which has base salary difference according to gender.
 
-```{r,warning=FALSE, echo=FALSE, message = FALSE}
-filted_data$company = toupper(filted_data$company)
-companies <- filted_data %>% group_by(company)%>%
-  summarise(n= n())
 
-com_rela <- filted_data %>%
-  group_by(company,gender)%>%
-  summarise(basesalary=median(basesalary)) %>%
-  pivot_wider(names_from = gender, values_from = basesalary) %>%
-  drop_na() %>%
-  mutate(sal_diff= Male -Female)
 
-ggplot(com_rela, aes(x = log10(sal_diff)))+
-  geom_histogram(color = "white", fill = "steelblue")+
-  ylab("Count")+xlab("base salary difference (log10)")+
-  ggtitle("base salary Difference in Companies")+
-  theme_bw()
-```
-At this level, we can observe there are significant base salary differences between males and females in most companies. Next step we will test how many companies are in the confidence interval. 
 
-```{r,warning=FALSE, echo=FALSE, message = FALSE}
 
-n <- 624
-xbar <- 0
-s <- sd(com_rela$sal_diff)
-margin <- qt(0.975,df=n-1)*s/sqrt(n)
-com_CI = c(xbar - margin,xbar + margin)
-com_x <- filted_data %>%
-  mutate(x = 1) %>%
-  group_by(company,x)%>%
-  summarise( x = sum(x))
-com_rela <- merge(com_rela,com_x) %>%
-  mutate(Sign_diff = case_when(sal_diff < com_CI[1]|sal_diff > com_CI[2] ~ FALSE,
-                               sal_diff > com_CI[1]&sal_diff < com_CI[2] ~ TRUE))
-
-summary(com_rela)
-```
-
-First, we assume that the base salary difference between men and women is zero in all companies, which means that the base salary difference is closer to zero, the more fair the base salary between men and women is. Next, we let zero be central to the confidence interval because we want this confidence interval to capture the companies that have smaller salary differences of gender. 
-
-```{r,warning=FALSE, echo=FALSE, message = FALSE}
-com_head <- com_rela[order(com_rela$x,decreasing = TRUE),] %>%
-  select(company,x,Sign_diff)
-head(com_head,20)
-```
-As result, we can see most companies are not captured by a confidence interval("FALSE" in "Sign_diff" ), which means they have gender bias salaries. Only ten percent of companies are "TRUE" for "Sign_diff",which means they have fair salaries.
-
-Is there any difference in gender gaps for different job positions?
+#### Secondly, we want to figure out whether job title is a factor of gender base salary gap in STEM field. Is there any difference in gender gaps for different job positions?
 
 ```{r gender gap in different job titles, message=FALSE, echo=FALSE}
 title_diff <- filted_data %>% 
@@ -467,10 +442,10 @@ From this histogram, we can see that for most job titles, male workers have a hi
 To verity that base salary differences of males and females in each job title is not the same, we conduct a chi-squared test to verity it. If there is no obvious gender base salary gap in each job level, the standard deviation of the base salary difference should be very small. And we consider the a standard deviation less than 500 to be small. 
 
 Our null hypothesis is 
-$H_0: $ No obvious gender base salary gap difference between each job title 
+$H_0:$ No obvious gender base salary gap difference between each job title 
 
 The alternative hypothesis is
-$H_1: $ There exists gender base salary gap difference between each job title 
+$H_1:$ There exists gender base salary gap difference between each job title 
 
 
 ```{r echo=FALSE, message = FALSE}
@@ -512,27 +487,110 @@ results %>%
 
 In conclusion, gender gap presents differently in different job titles and in some jobs, there might not be a gender gap. From the above histogram and wilcoxon test, we find that there is strong evidence that gender gap exists in employees with job title "Product Designer", "Product Manager", "Software Engineer", "Solution Architect", and "Technical Program Manager".
 
+
+
+
+
+
+#### Furthermore, we focused on the companies factors, we want to discover whether companies have influence on the base salary difference of males and females. 
+
+The plot follows the same logic as above-we count the number of companies which has base salary difference according to gender.
+
+```{r,warning=FALSE, echo=FALSE, message = FALSE}
+filted_data$company = toupper(filted_data$company)
+companies <- filted_data %>% group_by(company)%>%
+  summarise(n= n())
+
+com_rela <- filted_data %>%
+  group_by(company,gender)%>%
+  summarise(basesalary=median(basesalary)) %>%
+  pivot_wider(names_from = gender, values_from = basesalary) %>%
+  drop_na() %>%
+  mutate(sal_diff= Male -Female)
+
+ggplot(com_rela, aes(x = log10(sal_diff)))+
+  geom_histogram(color = "white", fill = "steelblue")+
+  ylab("Count")+xlab("base salary difference (log10)")+
+  ggtitle("Base salary Difference in Companies")+
+  theme_bw()
+```
+At this level, we can observe there are significant base salary differences between males and females in most companies. Next step we will test how many companies are in the confidence interval. 
+
+```{r,warning=FALSE, echo=FALSE, message = FALSE}
+
+n <- 624
+xbar <- 0
+s <- sd(com_rela$sal_diff)
+margin <- qt(0.975,df=n-1)*s/sqrt(n)
+com_CI = c(xbar - margin,xbar + margin)
+com_x <- filted_data %>%
+  mutate(x = 1) %>%
+  group_by(company,x)%>%
+  summarise( x = sum(x))
+com_rela <- merge(com_rela,com_x) %>%
+  mutate(Sign_diff = case_when(sal_diff < com_CI[1]|sal_diff > com_CI[2] ~ FALSE,
+                               sal_diff > com_CI[1]&sal_diff < com_CI[2] ~ TRUE))
+
+summary(com_rela)
+```
+
+First, we assume that the base salary difference between men and women is zero in all companies, which means that the base salary difference is closer to zero, the more fair the base salary between men and women is. Next, we let zero be central to the confidence interval because we want this confidence interval to capture the companies that have smaller salary differences of gender.
+
+```{r,warning=FALSE, echo=FALSE, message = FALSE}
+com_head <- com_rela[order(com_rela$x,decreasing = TRUE),] %>%
+  select(company,x,Sign_diff)
+
+head(com_head, 10)
+
+com_head %>% 
+  group_by(Sign_diff) %>% 
+  summarize(n = n())
+```
+
+According to the first 10 result of our test, we can see most companies are not captured by a confidence interval("FALSE" in "Sign_diff" ), which means they have gender bias base salaries. And the test summarize shows only about ten percent of companies in the America are "TRUE" for "Sign_diff",which means they have fair base salary for male and female
+
+
+
+
+
 ## Summary
 
-Based on the hypothesis tests, we find that in STEM fields, there exists gender base salary gap in STEM fields. So next we wanted to determine whether the gender base salary difference vary depending on other factors. Based on the regression model, we figured out that the gender base salary gap very may have relationship in factors like job title, location (in state level) and companies. After we used chi-squared test and wilcoxon test, the result shows that gender gap exists in employees with job title "Product Designer", "Product Manager", "Software Engineer", "Solution Architect", and "Technical Program Manager". And we let zero be central to the confidence interval to capture the companies that have smaller salary differences of gender. We found most companies have gender bias salaries, only “IBM”, “VMWARE” and “PAYPAL”, or 10% of companies have fair salaries. Finally, according to the histogram, the result of the wilconxon and the chi-squared test, there are 9 states reject our null hypothesis that there are no base salary difference, they are CA, WA, MA, NY, OR, TX, MN, NC, and FL, which means they have gender base salary gaps. In Conclusion, the base salary difference in gender are vary related to job title, companies and location.
+Based on the hypothesis test at the beginning, we find that in STEM fields, there still exists gender base salary gap. Next we determined whether the gender base salary difference vary depending on other factors. Based on the regression model, we figured out that the gender base salary gap very may have relationship in factors like job title and location (in state level). We also want to figure out whether companies influence the gender base salary gap. After we applying chi-squared test and wilcoxon test, we found that all these three factors indeed influence the gender base salary gap in STEM field.
+
+- For the `job title` factor, obvious evidence shows gender gap exists in employees with job title `Product Designer`, `Product Manager`, `Software Engineer`, `Solution Architect`, and `Technical Program Manager`, for other job title, there is no clear evidence there exists salary difference based on our data.
+
+- For the `location (state)` factor, employees working in places like CA, WA, MA, NY, OR, TX, MN, NC, and FL clearly experience base salary bias and for employees in other states, the gender base salary gap is not very obvious.
+
+- For the `company` factor, we let zero be central to the confidence interval to capture the companies that have smaller salary differences of gender. We found that over 90% companies have gender bias salaries, only companies such as `IBM`, `VMWARE` and `PAYPAL`, etc have fair salaries.
+
+In conclusion, there exists a gender gap in income level(base salary) in the STEM fields, and such difference vary depending on other factors such as job titles, working state locations, working companies, etc.
+
+
+
 
 ## Known Problems
 
-Our data has 29 columns, and each data entry may have NA value in different columns. If we
-simply drop all the rows containing NA value would make our dataset super small. So we
-decided to only drop the rows with NA value in the ‘gender’ column, and for other columns, we
-will have some extra data cleaning before using them for different purposes.
+Our data has 29 columns, and each data entry may have NA value in different columns. If we simply drop all the rows containing NA value would make our dataset super small. So we decided to only drop the rows with NA value in the ‘gender’ column, and for other columns, we will have some extra data cleaning before using them for different purposes.
 
-Another issue is that there are some outliers in our dataset (some people with extremely high
-salary), including their data in our dataset might lead to a worse performance for linear
-regression models and other models.
+Another issue is that there are some outliers in our dataset (some people with extremely high salary), including their data in our dataset might lead to a worse performance for linear regression models and other models.
 
 Since There are a lot more males than females in the data set (female sample is 2/3 of the male sample), it would influence the accuracy of our estimated model. Data imbalance is not only a problem in classification task, but also in regression tasks. The performance of a regression model may suffer from the fact that the distribution of the target variable is not normally distributed and skewed. Applying transformations on the target variable can boost the performance.
 
 
+
+
+
 ## Possible Future Questions
 
-So far, we can can only determine that there exist a gender gap in income level(base salary) in different data science and STEM subfields and different regions and the difference vary depending on different location(states level), different data science and STEM subfields and different companies. However, we can not qualify the gender gap in base salary, and we need to deal with solving the problem of sample imbalance in our dataset. To be able to deal with imbalanced data using these models, you have one of two options: first, is to increase the representation of the observations of interest vs. the other observations (or vice versa). Second, is to adapt the model itself by parameter tuning based on customized criteria. Also, it is worth further explore how the salary difference by other possible factors in STEM fields as well as non-STEM fields.
+So far, we only determine that there exists a gender gap in income level(base salary) in STEM fields the difference vary depending on different location(states level), different job title and different companies. However, we haven't qualify the gender gap in base salary, and we need to deal with solving the problem of sample imbalance in our dataset. To be able to deal with imbalanced data using these models, we have one of two options: first, is to increase the representation of the observations of interest vs. the other observations (or vice versa). Second one is to adapt the model itself by parameter tuning based on customized criteria. 
+
+Also, it is worth further explore the qualify of the gender salary difference by factors we discovered in STEM fields as well as the gender salary gap situation in non-STEM fields.
+
+Therefore, our future steps may first deal with the imbalance of our data set and possible future questions will be: Consider factors that influences gender salary gap that we discovered, which states/job titles/companies have the most serious salary gap? What is the gender salary gap situation in non-STEM fields?
+
+
+
+
 
 ## Reference
 

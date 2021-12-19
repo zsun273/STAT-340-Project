@@ -352,7 +352,7 @@ $H_1:$ There exists gender gap in base salary at state level.
 
 ```{r echo=FALSE, message = FALSE}
 library(EnvStats)
-varTest(x = state_rela$sal_diff, sigma.squared =  1/10000)
+varTest(x = state_rela$sal_diff, sigma.squared =  1/10000, alternative="greater")
 ```
 
 According to the chi-squared test, the p-value is smaller than `2.2e-16`, which means that we can reject our null hypothesis that there is no obvious gender gap in base salary at state level.
@@ -510,7 +510,7 @@ com_rela <- filted_data %>%
 ggplot(com_rela, aes(x = log10(sal_diff)))+
   geom_histogram(color = "white", fill = "steelblue")+
   ylab("Count")+xlab("base salary difference (log10)")+
-  ggtitle("Base salary Difference in Companies")+
+  ggtitle("Median Base salary Difference in Companies")+
   theme_bw()
 ```
 At this level, we can observe there are significant base salary differences between males and females in most companies. Next step we will test how many companies are in the confidence interval. 
@@ -554,7 +554,7 @@ According to the first 10 result of our test, we can see most companies are not 
 
 ## Summary
 
-Based on the hypothesis test at the beginning, we find that in STEM fields, there still exists gender gap in base salary. Next we examined whether the gender base salary difference vary depending on other factors. Based on the regression model, we figured out that the gender base salary gap have relationship to factors like job titles and locations (at state level). We also want to figure out whether companies influence the gender base salary gap. After we applying chi-squared test and wilcoxon test, we found that all these three factors indeed influence the gender base salary gap in STEM field.
+Based on the hypothesis test at the beginning, we find that in STEM fields, there still exists gender gap in base salary. Next we examined whether the gender base salary difference vary depending on other factors. Based on the regression model, we figured out that the gender base salary gap have relationship to factors like job titles and locations (at state level). We also figured out whether companies influence the gender base salary gap. After we applying chi-squared test and wilcoxon test, we found that all these three factors indeed influence the gender base salary gap in STEM field.
 
 - For the `job title` factor, evidence shows that gender gap exists in employees with job title `Product Designer`, `Product Manager`, `Software Engineer`, `Solution Architect`, and `Technical Program Manager`, for other job title, there is no clear evidence showing that there exists salary difference based on our data.
 
@@ -581,9 +581,9 @@ Since there are a lot more males than females in the data set (female sample is 
 
 ## Possible Future Questions
 
-So far, we only determine that there exists a gender gap in income level(base salary) in STEM fields the difference vary depending on different location(states level), different job titles and different companies. However, we haven't quantify the gender gap in base salary, and we need to solve the problem of sample imbalance in our dataset. To deal with imbalanced data using these models, we have two options: first is to increase the representation of the observations of interest vs. the other observations (or vice versa). The second one is to adapt the model itself by parameter tuning based on customized criteria. 
+So far, we only determine that there exists a gender gap in income level(base salary) in STEM fields the difference vary depending on different location(states level), different job titles and different companies. However, we haven't quantified the gender gap in base salary, and we need to solve the problem of sample imbalance in our dataset. To deal with imbalanced data using these models, we have two options: first is to increase the representation of the observations of interest vs. the other observations (or vice versa). The second one is to adapt the model itself by parameter tuning based on customized criteria. 
 
-Also, it is worth further explore the quantify of the gender salary difference by factors we discovered in STEM fields as well as the gender salary gap situation in non-STEM fields.
+Besides, we plan to quantify the influential factors of gender gap in base salary we found and also conduct research on gender gap in other industry.
 
 Therefore, our future steps includes dealing with the imbalance of our data set and possible future questions will be: Considering factors that influences gender base salary gap that we discovered, which states/job titles/companies have the most severe salary gap? What is the gender salary gap situation in non-STEM fields?
 
